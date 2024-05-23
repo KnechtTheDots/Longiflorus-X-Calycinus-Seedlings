@@ -1,0 +1,58 @@
+```{r warning=FALSE, echo=FALSE}
+library(tidyverse)
+df <- read.csv("data/main.csv")
+```
+
+```{r}
+day_4 <- df %>% 
+  drop_na(day_4) 
+
+lon <- day_4 %>% 
+  filter(class == "LON") %>% 
+  pull(day_4)
+
+cal <- day_4 %>% 
+  filter(class == "CAL") %>% 
+  pull(day_4)
+
+f1 <- day_4 %>% 
+  filter(class == "F1") %>% 
+  pull(day_4)
+
+f2 <- day_4 %>% 
+  filter(class == "F2") %>% 
+  pull(day_4)
+
+mid_p <- (mean(lon)+mean(cal))/2
+
+lon <- lon/mid_p
+cal <- cal/mid_p
+f1 <- f1/mid_p
+f2 <- f2/mid_p
+
+library(gtools)
+
+bayes_boot <- function(x){
+  weights_mat <- gtools::rdirichlet(n = 1e4, alpha = rep(1, length(x)))
+  mu <- apply(weights_mat, 1, function(z) sum(z*x))
+  sigma <- apply(weights_mat, 1, function(z) sqrt(sum(z*(x - mean(x))^2)))
+  return(data.frame(mu = mu, sd = sigma))
+}
+
+lon_boot <- bayes_boot(lon)
+cal_boot <- bayes_boot(cal)
+f1_boot <- bayes_boot(f1)
+f2_boot <- bayes_boot(f2)
+
+delta_pp <- c()
+for(i in 1:1e4){
+  lon <- mean(rnorm(length(lon), lon_boot$mu[i], lon_boot$sd[i]))
+  cal <- mean(rnorm(length(cal), cal_boot$mu[i], cal_boot$sd[i]))
+  f1 <- mean(rnorm(length(f1), f1_boot$mu[i], f1_boot$sd[i]))
+  f2 <- mean(rnorm(length(f2), f2_boot$mu[i], f2_boot$sd[i]))
+  
+  delta_pp[i] <- f2 - (.25*(lon + cal) + .5*f1)
+}
+hist(delta_pp)
+```
+
