@@ -1,16 +1,11 @@
-```{r warning=FALSE,message=FALSE}
-library(tidyverse)
-df <- read.csv("data/main.csv")
-set.seed(12042014)
-```
-
-```{r}
 bayes_boot <- function(x){
   weights_mat <- gtools::rdirichlet(n = 1e4, alpha = rep(1, length(x)))
   mu <- apply(weights_mat, 1, function(z) sum(z*x))
   sigma <- apply(weights_mat, 1, function(z) sqrt(sum(z*(x - mean(x))^2)))
   return(data.frame(mu = mu, sd = sigma))
 }
+
+
 post_pred <- function(df, trait){
   d <- df %>% 
     filter(germ_day==3) %>% 
@@ -63,15 +58,3 @@ post_pred <- function(df, trait){
   return(list(lon_pp = lon_pp, cal_pp = cal_pp, f1_pp = f1_pp, f2_pp = f2_pp,
               delta_pp = delta_pp))
 }
-
-```
-
-
-```{r}
-hist(post_pred(df, "day_4")$delta_pp)
-hist(post_pred(df, "day_17")$delta_pp)
-hist(post_pred(df, "rgr")$delta_pp)
-
-sum(post_pred(df, "rgr")$delta_pp < 0)/1e4
-```
-
