@@ -2,7 +2,7 @@
 bayes_boot <- function(x){
   weights_mat <- gtools::rdirichlet(n = 1e4, alpha = rep(1, length(x)))
   mu <- apply(weights_mat, 1, function(z) sum(z*x))
-  sigma <- apply(weights_mat, 1, function(z) sqrt(sum(z*(x - mean(x))^2)))
+  sigma <- apply(weights_mat, 1, function(z) sqrt(sum(z*(x - sum(z*x))^2)))
   return(data.frame(mu = mu, sd = sigma))
 }
 

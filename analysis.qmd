@@ -8,10 +8,13 @@ set.seed(12042014)
 ### Posterior Predictive Checks
 
 #### 1DAG
+
 ```{r warning=FALSE}
 post_pred_check(df, "day_4")
 ```
+
 #### 14DAG
+
 ```{r}
 post_pred_check(df, "day_17")
 ```
@@ -22,7 +25,6 @@ post_pred_check(df, "day_17")
 post_pred_check(df, "rgr")
 ```
 
-
 #### Height
 
 ```{r}
@@ -31,7 +33,7 @@ post_pred_check(df, "height_122")
 
 ### Posterior Predictive Distributions of Delta
 
-```{r}
+```{r message=FALSE}
 
 dag1 <- post_pred(df, "day_4")$delta_pp
 dag14 <- post_pred(df, "day_17")$delta_pp
@@ -48,12 +50,14 @@ data.frame(DAG1 = dag1, DAG14= dag14,
             upr.5 = quantile(delta, .75),
             lwr.5 = quantile(delta, .25)) %>% 
   ggplot() +
+  geom_vline(xintercept = 0, color = "grey", linewidth = 1) +
   geom_errorbarh(aes(y = trait, xmin = lwr, xmax = upr), height = 0, 
                  linewidth = 1) +
   geom_errorbarh(aes(y = trait, xmin = lwr.5, xmax = upr.5), height = 0, 
                  linewidth = 2) +
-  geom_vline(xintercept = 0, color = "grey", linewidth = 1) +
-  theme_minimal()
+  theme_minimal() +
+  labs(y = "Trait",
+       x = "O(F2) - E(F2)")
 
 ```
 
