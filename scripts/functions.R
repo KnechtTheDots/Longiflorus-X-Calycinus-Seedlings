@@ -30,12 +30,20 @@ post_pred <- function(df, trait, lik){
     filter(class == "F2") %>% 
     pull(trait)
   
-  mid_p <- (mean(lon)+mean(cal))/2
+  # mid_p <- (mean(lon)+mean(cal))/2
+  # 
+  # lon <- lon/mid_p
+  # cal <- cal/mid_p
+  # f1 <- f1/mid_p
+  # f2 <- f2/mid_p
   
-  lon <- lon/mid_p
-  cal <- cal/mid_p
-  f1 <- f1/mid_p
-  f2 <- f2/mid_p
+  mu <- mean(f2)
+  s <- sd(f2)
+  
+  lon <- (lon - mu)/s
+  cal <- (cal - mu)/s
+  f1 <- (f1 - mu)/s
+  f2 <- (f2 - mu)/s
   
   library(gtools)
   

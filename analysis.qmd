@@ -28,42 +28,42 @@ w &\sim Dirichlet(\alpha)  \\
 
 ```{r warning=FALSE}
 post_pred_check(df, "day_4", lik = "normal")
-post_pred_check(df, "day_4", lik = "gamma")
-post_pred_check(df, "day_4", lik = "log-normal")
+# post_pred_check(df, "day_4", lik = "gamma")
+# post_pred_check(df, "day_4", lik = "log-normal")
 ```
 
 #### 14DAG
 
 ```{r}
 post_pred_check(df, "day_17", "normal")
-post_pred_check(df, "day_17", "gamma")
-post_pred_check(df, "day_17", "log-normal")
+# post_pred_check(df, "day_17", "gamma")
+# post_pred_check(df, "day_17", "log-normal")
 ```
 
 #### RGR
 
 ```{r}
 post_pred_check(df, "rgr", "normal")
-post_pred_check(df, "rgr", "gamma")
-post_pred_check(df, "rgr", "log-normal")
+# post_pred_check(df, "rgr", "gamma")
+# post_pred_check(df, "rgr", "log-normal")
 ```
 
 #### Height
 
 ```{r}
 post_pred_check(df, "height_122", "normal")
-post_pred_check(df, "height_122", "gamma")
-post_pred_check(df, "height_122", "log-normal")
+# post_pred_check(df, "height_122", "gamma")
+# post_pred_check(df, "height_122", "log-normal")
 ```
 
 ### Posterior Predictive Distributions of Delta
 
 ```{r message=FALSE}
 
-dag1 <- post_pred(df, "day_4", "gamma")$delta_pp
-dag14 <- post_pred(df, "day_17", "gamma")$delta_pp
-rgr <- post_pred(df, "rgr", "gamma")$delta_pp
-height <- post_pred(df, "height_122", "gamma")$delta_pp
+dag1 <- post_pred(df, "day_4", "normal")$delta_pp
+dag14 <- post_pred(df, "day_17", "normal")$delta_pp
+rgr <- post_pred(df, "rgr", "normal")$delta_pp
+height <- post_pred(df, "height_122", "normal")$delta_pp
 
 data.frame(DAG1 = dag1, DAG14= dag14, 
            RGR = rgr, Height = height) %>% 
@@ -90,7 +90,7 @@ data.frame(DAG1 = dag1, DAG14= dag14,
 ### 
 
 ```{r}
-dag1 <- post_pred(df, "day_4", "gamma")$boots
+dag1 <- post_pred(df, "day_4", "normal")$boots
 dag1 <- dag1 %>% 
   pivot_longer(1:5, names_to = "line", values_to = "trait") %>% 
   group_by(line) %>% 
@@ -101,7 +101,7 @@ dag1 <- dag1 %>%
             lwr.5 = round(quantile(trait, .25),2)) %>% 
   mutate(trait = "1DAG")
 
-dag14 <- post_pred(df, "day_17", "gamma")$boots
+dag14 <- post_pred(df, "day_17", "normal")$boots
 dag14 <- dag14 %>% 
   pivot_longer(1:5, names_to = "line", values_to = "trait") %>% 
   group_by(line) %>% 
@@ -112,7 +112,7 @@ dag14 <- dag14 %>%
             lwr.5 = round(quantile(trait, .25),2)) %>% 
   mutate(trait = "14DAG")
 
-rgr <- post_pred(df, "rgr", "gamma")$boots
+rgr <- post_pred(df, "rgr", "normal")$boots
 rgr <- rgr %>% 
   pivot_longer(1:5, names_to = "line", values_to = "trait") %>% 
   group_by(line) %>% 
@@ -123,7 +123,7 @@ rgr <- rgr %>%
             lwr.5 = round(quantile(trait, .25),2)) %>% 
   mutate(trait = "RGR")
 
-height <- post_pred(df, "height_122", "gamma")$boots
+height <- post_pred(df, "height_122", "normal")$boots
 height <- height %>% 
   pivot_longer(1:5, names_to = "line", values_to = "trait") %>% 
   group_by(line) %>% 
@@ -157,6 +157,17 @@ tab_dat %>%
 ```
 
 ```{r}
-
+(p1 <- dag1 %>% 
+  mutate(plon = c(0, .51, .49, .5, 1),
+         group = c("a", letters[2:4], "a")) %>% 
+  ggplot(aes(x = plon, y = mu, group = group, color = line)) +
+  geom_line() +
+  geom_errorbar(aes(x = plon, ymax = upr, ymin = lwr), width = 0, 
+                linewidth = 1) +
+  geom_errorbar(aes(x = plon, ymax = upr.5, ymin = lwr.5), width = 0,
+                linewidth = 2) +
+  scale_color_manual(values = c("black", "red", "black", "blue", "black")) +
+  theme_minimal() +
+  labs(x = "Proportion Longiflorus"))
 ```
 
