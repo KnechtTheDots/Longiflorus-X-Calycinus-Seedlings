@@ -171,3 +171,51 @@ tab_dat %>%
   labs(x = "Proportion Longiflorus"))
 ```
 
+```{r warning=FALSE, message=FALSE}
+d <- read.csv("data/seed_growth_vs_seed_size.csv")
+
+dat <- d %>% drop_na(day_17, death_day) %>% 
+  mutate(size = (day_17 - mean(day_17))/sd(day_17)) %>% 
+  mutate(survive = death_day - 3)
+
+library(cmdstanr)
+mod <- cmdstan_model("scripts/survival.stan")
+
+stan_dat <- list(
+  N = nrow(dat),
+  y = dat$survive,
+  X = matrix(c(rep(1, nrow(dat)), dat$size), ncol = 2),
+  X_rep = matrix(c(rep(1,100), seq(-2,3, l = 100)),ncol = 2),
+  K = 100
+)
+
+fit <- mod$sample(
+  data = stan_dat,
+  chains = 4,
+  parallel_chains = 4
+)
+
+p <- fit$draws("p", format = "df")[,1:100]
+
+colnames(p) <- stan_dat$X_rep[,2]
+
+p %>% 
+  pivot_longer(1:100, names_to = "size", values_to = "p") %>% 
+  group_by(size) %>% 
+  summarise(mu = mean(p),
+            upr = quantile(p, .975),
+            lwr = quantile(p, .025),
+            upr.5 = quantile(p, .75),
+            lwr.5 = quantile(p, .25)) %>% 
+  mutate(size = as.numeric(size)) %>% 
+  ggplot(aes(x = size, y = mu)) +
+  geom_point(data = dat, aes(x = size, y = survive)) +
+  geom_line(linewidth = 1) +
+  geom_ribbon(aes(x = size, ymax = upr, ymin = lwr),
+              color = "grey", alpha = .25) +
+  geom_ribbon(aes(x = size, ymax = upr.5, ymin = lwr.5),
+              color = "grey", alpha = .25) +
+  theme_minimal()
+
+```
+
