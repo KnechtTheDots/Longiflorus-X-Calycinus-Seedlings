@@ -1,3 +1,10 @@
+# z score function
+stn <- function(x){
+  (x - mean(x))/sd(x)
+}
+
+
+
 ## functionto do the bayesian bootstrap and get mean and sd
 bayes_boot <- function(x){
   weights_mat <- gtools::rdirichlet(n = 1e4, alpha = rep(1, length(x)))
