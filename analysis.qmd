@@ -173,7 +173,7 @@ tab_dat %>%
 ```
 
 
-
+$$
 \begin{align*}
 log(size) &\sim Gamma(\alpha, \beta)\\
 \alpha &= \frac{\mu^2}{\sigma^2}\\
@@ -181,7 +181,7 @@ log(size) &\sim Gamma(\alpha, \beta)\\
 \mu &= \alpha_{rgr} + rgr\times age\\
 \sigma^2 &\sim Normal^+(0, .5)\\
 \end{align*}
-
+$$
 
 
 
@@ -194,12 +194,11 @@ rgr_dat <- d %>%
   mutate(ind = 1:105) %>% 
   pivot_longer(4:10, names_to = "day", values_to = "size") %>% 
   drop_na(size) %>% 
-  mutate(l_size = log(size)) %>% 
   separate(day, into = (c("a", "day"))) %>% 
   mutate(day = as.numeric(day),
          age = day - germ_day) %>% 
-  filter(age > 0) %>% 
-  select(ind, age, l_size)
+  filter(age > 0 & day < 17) %>% 
+  select(ind, age, size)
 
 full <- d %>% drop_na(germ_day, death_day) %>%
   mutate(ind = 1:105) %>% 
@@ -239,7 +238,7 @@ stan_dat <- list(
   seed_size = full$seed_size,
   germ_day = full$germ_day,
   N_rgr = nrow(rgr_dat),
-  l_size = rgr_dat$l_size,
+  size_rgr = rgr_dat$size,
   age = rgr_dat$age,
   ind_rgr = rgr_dat$ind,
   survive = full$survive,
